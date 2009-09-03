@@ -12,6 +12,7 @@
 *  - Grows parents if they have a fixed height
 *  - Ghost text replacement
 *  - Text input emulation (enter can submit form, instead of new line)
+*  - Restore the old height, if the value = '' (@ledil patch)
 *
 * Usage:
 *
@@ -89,7 +90,7 @@ var Flext = new Class({
 	initialize: function(el, options) {
 		this.setOptions(options);
 		
-		this.el = document.id(el); //the textarea element.
+		this.el = $(el); //the textarea element.
 		
 		//by default, we will do nothing to the text area unless it has the class...
 		this.autoGrow = el.hasClass(this.options.growClass);
@@ -100,6 +101,7 @@ var Flext = new Class({
 		
 		//initialize, and add events:
 		if(this.autoGrow) {
+			this.origHeight = this.getOrigHeight();
 			this.resizer = new Fx.Tween(this.el, {duration: this.options.aniTime});
 			this.getMaxSize();
 			this.reachedMax = false;
@@ -156,6 +158,7 @@ var Flext = new Class({
 					'blur': function(e) {
 						if(this.el.value == '') {
 							this.el.set('value', this.ghostText);
+							this.el.setStyle('height',this.origHeight+'px');
 							if(this.ghostClass) {
 								this.el.addClass(this.ghostClass);
 							}
@@ -164,7 +167,14 @@ var Flext = new Class({
 				});
 			}
 		}
-		
+	},
+	getOrigHeight: function() {
+		var padds = this.el.getStyle('padding');
+		var padds_top = padds.split(' ')[0].split('px')[0];
+		var padds_bottom = padds.split(' ')[2].split('px')[0];
+		var border_top = this.el.getStyle('border-top').split('px')[0];
+		var border_bottom = this.el.getStyle('border-bottom').split('px')[0];
+		return this.el.getCoordinates().height-parseInt(padds_top)-parseInt(padds_bottom)-parseInt(border_top)-parseInt(border_bottom);
 	},
 	getMaxSize: function() {
 		this.maxSize = this.options.maxHeight;
@@ -252,4 +262,3 @@ window.addEvent('domready', function() {
 		new Flext(el); 
 	});
 });
-
