@@ -158,7 +158,7 @@ var Flext = new Class({
 					'blur': function(e) {
 						if(this.el.value == '') {
 							this.el.set('value', this.ghostText);
-							this.el.setStyle('height',this.origHeight+'px');
+                                                        this.resizer.start('height', this.origHeight);
 							if(this.ghostClass) {
 								this.el.addClass(this.ghostClass);
 							}
